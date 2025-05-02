@@ -6,6 +6,8 @@ import Profile from "./components/Profile/Profile";
 import ForgotPassword from "./components/Screens/ForgotPassword";
 import Verification from "./components/Screens/Verification";
 import ResetPassword from "./components/Screens/ResetPassword";
+import Lobby from "./components/Screens/Lobby";
+import GameScreen from "./components/Screens/GameScreen";
 
 const App = () => {
   return (
@@ -16,6 +18,10 @@ const App = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="verify-email/:token" element={<Verification/>} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/lobby" element={<Lobby/>} />
+      <Route path="/game/:roomId" element={<GameScreen />} />
+      <Route path="/game/:roomId/:username" element={<GameScreen />} />
+      <Route path="/" element={<Lobby />} />
     </Routes>
   );
 };

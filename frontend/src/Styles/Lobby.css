@@ -1,0 +1,112 @@
+.lobby-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f7;
+}
+
+.lobby-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.lobby-title {
+  color: #151717;
+  text-align: center;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.lobby-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.lobby-input {
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  height: 45px;
+  padding: 0 14px;
+  font-size: 15px;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.lobby-input:focus {
+  border-color: #2d79f3;
+  box-shadow: 0 0 5px rgba(45, 121, 243, 0.2);
+  outline: none;
+}
+
+.room-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.random-room-button {
+  background-color: #4a5786;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.random-room-button:hover {
+  background-color: #394366;
+}
+
+.join-button {
+  background-color: #151717;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  height: 48px;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin-top: 8px;
+}
+
+.join-button:hover {
+  background-color: #252727;
+}
+
+.join-button:active {
+  transform: scale(0.97);
+}
+
+.lobby-info {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+@media (max-width: 500px) {
+  .lobby-card {
+    width: 90%;
+    padding: 25px;
+  }
+}
