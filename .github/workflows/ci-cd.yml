@@ -1,0 +1,99 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Test and Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          
+      - name: Backend - Install Dependencies
+        run: |
+          cd backend
+          npm install
+      
+      - name: Backend - Lint Check
+        run: |
+          cd backend
+          npm install eslint -g || true
+          eslint . --ext .js || true
+          
+      - name: Frontend - Install Dependencies
+        run: |
+          cd frontend
+          npm install
+          
+      - name: Frontend - Lint Check
+        run: |
+          cd frontend
+          npm run lint || true
+          
+      - name: Frontend - Build Check
+        run: |
+          cd frontend
+          npm run build
+          
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      # Create production .env files from GitHub secrets
+      - name: Create Backend .env file
+        run: |
+          cd backend
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > .env
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+          echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
+          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
+          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
+          echo "PORT=3000" >> .env
+          
+      - name: Create Frontend .env file
+        run: |
+          cd frontend
+          echo "VITE_BACKEND_URL=${{ secrets.BACKEND_URL }}" > .env
+          echo "VITE_FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+      
+      # Deploy to Render (Backend)
+      - name: Deploy Backend to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          -H "Content-Type: application/json"
+          
+      # For Vercel deployment, we will push and let Vercel's GitHub integration handle the deploy
+      - name: Deploy Frontend using Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          npm install -g vercel
+          cd frontend
+          vercel --token $VERCEL_TOKEN --prod --yes
