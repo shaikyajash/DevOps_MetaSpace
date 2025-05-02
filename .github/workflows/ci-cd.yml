@@ -64,12 +64,23 @@ jobs:
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       
-      # Deploy Frontend to Vercel using their official Action
+      # Create production .env file for frontend
+      - name: Create Frontend .env file
+        run: |
+          cd frontend
+          echo "VITE_BACKEND_URL=${{ secrets.BACKEND_URL }}" > .env
+          echo "VITE_FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+      
+      # Deploy Frontend to Vercel with manual CLI approach
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      
       - name: Deploy Frontend to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./frontend
-          vercel-args: '--prod'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          cd frontend
+          vercel deploy --prod --token=$VERCEL_TOKEN
