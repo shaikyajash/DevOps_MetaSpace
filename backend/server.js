@@ -13,8 +13,6 @@ const { v4: uuidv4 } = require("uuid");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 
-// Connect to Database
-connectDB();
 
 const app = express();
 const server = http.createServer(app);
