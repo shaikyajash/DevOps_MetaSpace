@@ -63,18 +63,13 @@ jobs:
       - name: Deploy Backend to Render
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-          
-      # Deploy Frontend to Vercel
-      - name: Setup Vercel CLI
-        run: npm install -g vercel
-          
+      
+      # Deploy Frontend to Vercel using their official Action
       - name: Deploy Frontend to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: |
-          cd frontend
-          vercel pull --yes --environment=production --token $VERCEL_TOKEN
-          vercel build --prod --token $VERCEL_TOKEN
-          vercel deploy --prebuilt --prod --token $VERCEL_TOKEN
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./frontend
+          vercel-args: '--prod'
