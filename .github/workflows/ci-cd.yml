@@ -59,41 +59,22 @@ jobs:
         with:
           node-version: '20'
       
-      # Create production .env files from GitHub secrets
-      - name: Create Backend .env file
-        run: |
-          cd backend
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > .env
-          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
-          echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
-          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
-          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
-          echo "PORT=3000" >> .env
-          
-      - name: Create Frontend .env file
-        run: |
-          cd frontend
-          echo "VITE_BACKEND_URL=${{ secrets.BACKEND_URL }}" > .env
-          echo "VITE_FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
-          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-      
-      # Deploy to Render (Backend)
+      # Deploy to Render using Deploy Hook URL
       - name: Deploy Backend to Render
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
-          -H "Authorization: Bearer $RENDER_API_KEY" \
-          -H "Content-Type: application/json"
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
           
-      # For Vercel deployment, we will push and let Vercel's GitHub integration handle the deploy
-      - name: Deploy Frontend using Vercel
+      # Deploy Frontend to Vercel
+      - name: Setup Vercel CLI
+        run: npm install -g vercel
+          
+      - name: Deploy Frontend to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         run: |
-          npm install -g vercel
           cd frontend
-          vercel --token $VERCEL_TOKEN --prod --yes
+          vercel pull --yes --environment=production --token $VERCEL_TOKEN
+          vercel build --prod --token $VERCEL_TOKEN
+          vercel deploy --prebuilt --prod --token $VERCEL_TOKEN
