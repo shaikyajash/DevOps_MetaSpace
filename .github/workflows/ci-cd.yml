@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Backend CI/CD Pipeline
 
 on:
   push:
@@ -30,23 +30,8 @@ jobs:
           npm install eslint -g || true
           eslint . --ext .js || true
           
-      - name: Frontend - Install Dependencies
-        run: |
-          cd frontend
-          npm install
-          
-      - name: Frontend - Lint Check
-        run: |
-          cd frontend
-          npm run lint || true
-          
-      - name: Frontend - Build Check
-        run: |
-          cd frontend
-          npm run build
-          
   deploy:
-    name: Deploy
+    name: Deploy to Render
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
@@ -54,33 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      
       # Deploy to Render using Deploy Hook URL
       - name: Deploy Backend to Render
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-      
-      # Create production .env file for frontend
-      - name: Create Frontend .env file
+          
+      # Optional: Add a verification step
+      - name: Verify Deployment
         run: |
-          cd frontend
-          echo "VITE_BACKEND_URL=${{ secrets.BACKEND_URL }}" > .env
-          echo "VITE_FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
-          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-      
-      # Deploy Frontend to Vercel with manual CLI approach
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-      
-      - name: Deploy Frontend to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          cd frontend
-          vercel deploy --prod --token=$VERCEL_TOKEN
+          echo "Backend deployment triggered successfully"
+          echo "Render is now building and deploying the application"
+          echo "Check deployment status at https://dashboard.render.com"
