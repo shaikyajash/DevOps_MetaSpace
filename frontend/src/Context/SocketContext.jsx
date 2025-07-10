@@ -30,7 +30,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Only initialize socket once
-    const newSocket = io('http://localhost:3000');
+    const newSocket = io(`${import.meta.env.VITE_BACKEND_URL}`);
 
     newSocket.on('connect', () => {
       console.log('Socket.IO connected');
